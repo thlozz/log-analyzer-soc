@@ -1,0 +1,20 @@
+Oct 08 10:15:01 server sshd[1024]: Failed password for root from 192.0.2.10 port 45212 ssh2
+Oct 08 10:15:05 server sshd[1024]: Failed password for root from 192.0.2.10 port 45214 ssh2
+Oct 08 10:15:10 server sshd[1024]: Failed password for invalid user admin from 192.0.2.10 port 45216 ssh2
+Oct 08 10:16:00 server sshd[1025]: Failed password for user1 from 198.51.100.77 port 51100 ssh2
+Oct 08 10:16:02 server sshd[1025]: Failed password for user1 from 198.51.100.77 port 51102 ssh2
+Oct 08 10:17:30 server sshd[1026]: Failed password for root from 192.0.2.55 port 33120 ssh2
+Oct 08 10:18:12 server sshd[1027]: Failed password for invalid user guest from 192.0.2.10 port 45220 ssh2
+Oct 08 10:18:15 server sshd[1027]: Failed password for invalid user guest from 192.0.2.10 port 45222 ssh2
+Oct 08 10:19:01 server sshd[1028]: Failed password for root from 203.0.113.15 port 60123 ssh2
+Oct 08 10:19:05 server sshd[1028]: Failed password for root from 203.0.113.15 port 60125 ssh2
+Oct 08 10:19:08 server sshd[1028]: Failed password for root from 203.0.113.15 port 60127 ssh2
+Oct 08 10:19:12 server sshd[1028]: Failed password for root from 203.0.113.15 port 60129 ssh2
+Oct 08 10:19:30 server sshd[1029]: Invalid user oracle from 192.0.2.55 port 33200
+Oct 08 10:19:31 server sshd[1029]: Failed password for invalid user oracle from 192.0.2.55 port 33200 ssh2
+Oct 08 10:19:40 server sshd[1030]: Accepted password for maria from 198.51.100.77 port 51200 ssh2
+198.51.100.4 - - [08/Oct/2026:10:20:01 -0300] "POST /login.php HTTP/1.1" 401 128
+198.51.100.4 - - [08/Oct/2026:10:20:05 -0300] "POST /login.php HTTP/1.1" 401 128
+198.51.100.4 - - [08/Oct/2026:10:20:10 -0300] "POST /login.php HTTP/1.1" 403 250
+198.51.100.9 - joao [08/Oct/2026:10:21:00 -0300] "POST /login.php HTTP/1.1" 401 128
+198.51.100.9 - - [08/Oct/2026:10:21:30 -0300] "GET /index.html HTTP/1.1" 200 5120
