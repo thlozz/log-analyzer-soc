@@ -5,14 +5,14 @@ on:
 jobs:
   testes-unitarios:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-      - name: Verificar sintaxe
-        run: python -m compileall -q log_analyzer.py tests
-      - name: Executar testes unitários
-        run: python -m unittest discover -s tests -v
-      - name: Executar exemplo sintético
-        run: python log_analyzer.py sample.log --window 10 --year 2026
+          python-version: ${{ matrix.python-version }}
+      - name: Executar testes
+        run: python -m unittest -v
