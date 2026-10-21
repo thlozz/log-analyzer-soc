@@ -1,14 +1,18 @@
-name: Python tests
+name: Testes do analisador
 on:
   push:
   pull_request:
 jobs:
-  unit-tests:
+  testes-unitarios:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Run unit tests
+      - name: Verificar sintaxe
+        run: python -m compileall -q log_analyzer.py tests
+      - name: Executar testes unitários
         run: python -m unittest discover -s tests -v
+      - name: Executar exemplo sintético
+        run: python log_analyzer.py sample.log --window 10 --year 2026
