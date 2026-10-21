@@ -1,60 +1,41 @@
-# Analisador de Logs de Segurança (`log_analyzer.py`)
+# Analisador de Logs de Segurança
 
-Script em Python que automatiza a triagem de possíveis ataques de **força bruta** (MITRE ATT&CK **T1110 – Brute Force**) em logs de **SSH** e de **servidores web**. Todos os dados de exemplo são fictícios.
+Ferramenta Python sem dependências externas para triagem de autenticações SSH e respostas HTTP 401/403. Dados de demonstração fictícios.
 
-## O que ele faz
-- Detecta tentativas de login falhas:
-  - **SSH:** linhas `Failed password` (inclui usuários inexistentes).
-  - **Web:** respostas HTTP `401` (não autenticado) e `403` (acesso negado).
-- Extrai e valida o IP de origem (IPv4 e IPv6).
-- Gera um ranking dos **IPs com mais falhas**, com o percentual do total.
-- Marca como **SUSPEITO** os IPs acima de um limiar configurável.
-- Exporta o resultado em **CSV** (opcional).
+## Recursos
+- Interpretação de falhas e sucessos SSH (`Failed password`, `Accepted password`, `Accepted publickey`).
+- Detecção de **sucesso SSH após falhas anteriores do mesmo IP**: `COMPROMETIMENTO?` indica investigação necessária, **não comprometimento confirmado**.
+- Análise de HTTP 401/403 com qualquer método HTTP (incluindo HEAD, PATCH e OPTIONS).
+- Contagem de usuários distintos por IP, útil como sinal auxiliar para password spraying.
+- `--window` calcula o **pico de falhas por IP em uma janela deslizante**, sem dupla contagem de eventos; `--year` define o ano dos timestamps syslog.
+- Exportação CSV, validação de IP e testes unitários.
 
-## Como usar
+## Uso
 ```bash
 python log_analyzer.py sample.log
-python log_analyzer.py sample.log --top 5 --threshold 3 --csv resultado.csv
+python log_analyzer.py sample.log --top 10 --threshold 5 --window 10 --year 2026
+python log_analyzer.py sample.log --csv resultado.csv
+python -m unittest discover -s tests -v
 ```
 
-| Argumento | Descrição | Padrão |
-| :--- | :--- | :---: |
-| `log_file` | Caminho do arquivo de log | obrigatório |
-| `--top` | Quantidade de IPs no ranking | 10 |
-| `--threshold` | Falhas mínimas para marcar como SUSPEITO | 5 |
-| `--csv` | Exporta o ranking para CSV | desativado |
+| Parâmetro | Descrição | Padrão |
+| --- | --- | --- |
+| `--top` | Quantidade de IPs exibidos | 10 |
+| `--threshold` | Pico de falhas para status SUSPEITO | 5 |
+| `--window` | Janela deslizante em minutos | Sem janela |
+| `--year` | Ano para timestamps SSH sem ano | Ano corrente |
+| `--csv` | Caminho do CSV exportado | Desativado |
 
-## Exemplo de saída (`sample.log`)
-```text
+## Notas de detecção
+- No `sample.log`, o IP `198.51.100.77` apresenta duas falhas e depois um sucesso SSH, **para usuários diferentes**. O sinal é registrado por IP e precisa de investigação; não é prova de invasão de conta.
+- Sem `--window`, as falhas são acumuladas em todo o arquivo. Com janela, a coluna de falhas representa o **máximo em uma janela**, não o total histórico; o percentual é calculado sobre o total de falhas.
+- Os timestamps de syslog são interpretados em UTC por convenção de demonstração; logs web usam o fuso declarado.
+- Respostas HTTP 403 podem ser autorização negada em páginas que não são de login. Dados sem usuário identificado não contribuem para a contagem de usuários distintos.
+- A detecção de sucesso após falhas é correlacionada por **IP**, não por identidade, e pode produzir falsos positivos em redes NAT.
+- Em caso de janela configurada, a correlação de sucesso considera falhas do mesmo IP dentro da janela.
+- Não utilizar dados sensíveis ou logs reais de clientes neste projeto público.
 
-========================================================================
-           RELATÓRIO DE SEGURANÇA: TOP 10 IPs COM LOGIN FALHO           
-========================================================================
-Total de falhas detectadas: 17
-Limiar para SUSPEITO: 5 falhas ou mais
-
-POS   | ENDEREÇO IP          | FALHAS   | % DO TOTAL | STATUS
-------------------------------------------------------------------------
-1     | 192.0.2.10           | 5        |     29.41% | SUSPEITO
-2     | 203.0.113.15         | 4        |     23.53% | ok
-3     | 198.51.100.4         | 3        |     17.65% | ok
-4     | 198.51.100.77        | 2        |     11.76% | ok
-5     | 192.0.2.55           | 2        |     11.76% | ok
-6     | 198.51.100.9         | 1        |      5.88% | ok
-========================================================================
-```
-
-## Decisões e limitações
-- **Sem dupla contagem:** o `sshd` registra `Invalid user` **e** `Failed password` para a mesma tentativa. O script conta apenas `Failed password`.
-- **Status 403** pode ser acesso negado a uma página, e não necessariamente falha de login. Em produção, vale filtrar por rotas de login.
-- **Limiar fixo:** o valor padrão (5 falhas) é ilustrativo. Em um SOC real, o limiar deve considerar janela de tempo (ex.: 5 falhas em 1 minuto), o que é uma melhoria futura.
-- **Formatos suportados:** `auth.log`/`secure` do OpenSSH e logs web no formato *common/combined* (Apache/Nginx).
-- IPs privados e de documentação (RFC 5737) são usados apenas para teste.
-
-## Relação com GRC
-A mitigação desse tipo de ataque está prevista na Política de Segurança (seção 5.3, bloqueio de conta após 5 tentativas) e no risco **R-04** (credenciais fracas) da Matriz de Riscos do projeto.
-
-## Próximos passos
-- Janela de tempo na detecção (taxa de falhas por minuto).
-- Teste com um *dataset* público de `auth.log`.
-- Integração com alertas (e-mail ou webhook).
+## Projetos relacionados
+- [Sentinel SOC](https://github.com/thlozz/sentinel-soc)
+- [Política de Segurança da Informação](https://github.com/thlozz/psi-clinica-viver-bem)
+- [Matriz de Riscos GRC](https://github.com/thlozz/matriz-riscos-grc)
